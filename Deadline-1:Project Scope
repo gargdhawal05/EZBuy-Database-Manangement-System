@@ -1,0 +1,102 @@
+                                                                                    Deadline-1
+
+                                                                    Ansh Varshney(2022083),Dhawal Garg(2022160),
+                                                                    Prakhar Agrawal(2022361),Suhani Kalyani(2022511)
+
+                                                                      Project Scope & Business Requirements
+
+
+                                              ● Introduction
+  
+                                                Our project aims to establish and operate EzBuy, an online retail store offering a
+                                                diverse range of daily use products. The focus is on bringing all the stakeholders
+                                                on a common platform and providing a smooth and easy-to-use experience for
+                                                the customers. The platform offers a wide array of products including groceries,
+                                                household items, stationary, etc.
+
+                                              ● StakeHolders
+
+                                                1. Customer-A customer can freely browse the site, view products, and explore
+                                                features and order products.
+                                                2. Vendor-It is the entity that is responsible for supplying items to the customers.
+                                                They ensure that the inventory is well-stocked with the desired number of
+                                                required products and provide accurate and timely deliveries to the customers.
+                                                3. Delivery agency-The delivery agency is responsible for providing delivery agents
+                                                to the company who are responsible for delivery of orders from the nearest store
+                                                to the customers’ specified delivery locations.
+                                                4. DataBase Manager- The company/ business owner manages the ecommerce
+                                                platform and can estimate the business statistics (profits, losses, total revenue
+                                                etc.) for the website.
+
+                                              ● Functionalities
+
+                                                1. Customer-
+                                                ● Customers can browse the products available in the store. This does not
+                                                require any log in/sign up.
+                                                ● Customers can add items to a shopping cart without logging in,associated
+                                                with their session until the browser is closed or cookies are cleared.At
+                                                checkout,they are prompted to login/ sign up.
+                                                ● While signing up, the customer will have to enter details: name, address,
+                                                phone number, email, set password etc. Post this, the database will assign
+                                                each customer a unique id internally. To login, the customer will have to
+                                                enter their email and password.
+                                                ● There are two types of subscriptions: Normal & Premium. Premium
+                                                customers can enjoy special offers and reduced delivery charges;
+                                                subscription incurs an associated cost.
+                                                ● The platform will offer secure and convenient payment options to the
+                                                customers, integrating with various payment gateways to accept credit
+                                                cards, digital wallets, and other forms of online payment.
+                                                ● Registered customers can view previous order history and track current
+                                                order status. They will also be notified about order tracking updates.
+                                                ● Customers can review purchased products on the website. Each product
+                                                would be assigned a star rating based on these reviews.
+                                                ● Customers can return/replace products (if returnable) if the product is
+                                                faulty. The customer can avail the customer care services also if needed.
+                                                
+                                                2. Vendor-
+                                                ● Vendors are responsible for ensuring timely replenishment of inventory.
+                                                ● The vendor also monitors inventory turnover and conducts regular audits
+                                                to enhance overall operational efficiency of the store.
+                                                ● The vendor has to decide the prices of the products supplied. Vendors
+                                                would also be responsible for uploading the descriptions and images of
+                                                the products supplied by them.
+                                                ● When a customer places an order, the vendor processes the order by
+                                                picking the items from its inventory, preparing them for delivery and
+                                                coordinating with the delivery agent for timely pickup.
+                                                
+                                                3. Delivery Agency-
+                                                ● The delivery agency will provide delivery agents to the company. The
+                                                agency will also provide the delivery agent’s details which includes their
+                                                name, phone number, identity proof.
+                                                ● The delivery agents are responsible for verifying the order details,
+                                                ensuring that the correct items are collected and delivered to the right
+                                                customer.
+                                                ● Customers’ contact details are shared with the delivery agent for smooth
+                                                communication and providing them updates on the delivery status,
+                                                instructions, etc.
+                                                
+                                                4. Database Manager-
+                                                ● The company managing the platform can view the total revenue generated
+                                                in a day and average profits/losses endured in a year.
+                                                ● Database Manager can view the total count of customers, items, delivery
+                                                persons, inventory products, etc.
+                                                ● Database managers have access to comprehensive buying and selling
+                                                histories,each identifiable by unique IDs,facilitating efficient tracking and
+                                                analysis of transactions.
+                                                ● The E-commerce platform will have items segregated into relevant
+                                                categories (i.e. groceries, stationery items etc.).
+                                                ● Database managers can add/remove/view discounts and offers given to
+                                                the customers on various products. Premium members would be able to
+                                                purchase at reduced prices.
+
+                                              ● Tech Stack
+                                                
+                                                1. MySql
+                                                2. HTML
+                                                3. CSS
+                                                4. Python
+                                                
+                                              ● Contributions
+                                                
+                                                All members discussed their ideas, fostered collaboration and contributed
+                                                equally.
