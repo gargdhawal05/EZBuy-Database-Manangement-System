@@ -1,0 +1,43 @@
+Triggers
+
+--> To block user's account after 3 failures to login attempt
+
+DELIMITER $$
+CREATE TRIGGER block_account_after_three_attempts
+AFTER INSERT ON login_attempts
+FOR EACH ROW
+BEGIN
+    DECLARE failed_attempts INT;
+    DECLARE pass VARCHAR(255);
+    DECLARE email VARCHAR(255);
+    SET email = NEW.Email;
+    SET pass = NEW.Pass;
+    
+    SELECT COUNT(*) INTO failed_attempts
+    FROM login_attempts
+    WHERE login_attempts.Email = email;
+
+    IF failed_attempts >= 3 AND NOT EXISTS (
+        SELECT *
+        FROM customer
+        WHERE customer.Password = pass and customer.Email = email
+    ) THEN
+        UPDATE customer
+        SET customer.Blocked = 1
+        WHERE customer.Email = email;
+    END IF;
+END;
+$$
+DELIMITER ;
+
+--> Set Availability of Delivery Agent to No once a order is placed 
+
+DROP TRIGGER IF EXISTS DeliveryAgentAvail;
+DELIMITER $$
+CREATE TRIGGER DeliveryAgentAvail AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+    UPDATE Delivery_Agent SET Availability = 'NO' WHERE DeliveryAgent_ID = NEW.DeliveryAgent_ID;
+END;
+$$
+DELIMITER ;

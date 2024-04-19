@@ -1,0 +1,329 @@
+DROP DATABASE ezbuydatabase;
+CREATE DATABASE EZBuyDatabase;
+USE EZBuyDatabase;
+SET SQL_SAFE_UPDATES = 0;
+
+CREATE TABLE customer (
+    Customer_id INT PRIMARY KEY auto_increment,
+    First_name VARCHAR(50) NOT NULL,
+    Second_name VARCHAR(50),
+    Email VARCHAR(30) UNIQUE,
+    Password VARCHAR(20) NOT NULL,
+    Subscription VARCHAR(20) DEFAULT 'Basic',
+    Address VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE customer_phone_numbers (
+    phone_number_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    Phone_number VARCHAR(10) UNIQUE NOT NULL CHECK (LENGTH(Phone_number) = 10),
+    FOREIGN KEY (customer_id) REFERENCES customer(Customer_id) ON DELETE CASCADE
+);
+
+INSERT INTO customer VALUES
+(1, 'Rahul', 'Gupta', 'rahul@gmail.com', 'password1', 'Premium', '123 Main St, Delhi, India'),
+(2, 'Priya', 'Patel', 'priya@gmail.com', 'password2', 'Basic', '456 Elm St, Mumbai, India'),
+(3, 'Amit', 'Sharma', 'amit@gmail.com', 'password3', 'Premium', '789 Oak St, Kolkata, India'),
+(4, 'Neha', 'Jain', 'neha@gmail.com', 'password4', 'Basic', '321 Pine St, Bangalore, India'),
+(5, 'Raj', 'Verma', 'raj@gmail.com', 'password5', 'Premium', '555 Cedar St, Hyderabad, India'),
+(6, 'Sneha', 'Singh', 'sneha@gmail.com', 'password6', 'Basic', '999 Maple St, Chennai, India'),
+(7, 'Ankit', 'Yadav', 'ankit@gmail.com', 'password7', 'Premium', '777 Birch St, Pune, India'),
+(8, 'Pooja', 'Goyal', 'pooja@gmail.com', 'password8', 'Basic', '888 Walnut St, Jaipur, India'),
+(9, 'Sachin', 'Kumar', 'sachin@gmail.com', 'password9', 'Premium', '111 Pineapple St, Lucknow, India'),
+(10, 'Shreya', 'Mishra', 'shreya@gmail.com', 'password10', 'Basic', '222 Cherry St, Patna, India');
+
+INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES
+(1, '9899112020'),
+(2, '9876543210'),
+(3, '9551234567'),
+(3, '9899118181'),
+(4, '9449876543'),
+(5, '8223334444'),
+(6, '9778889999'),
+(7, '9665554444'),
+(7, '9181811192'),
+(8, '9832221111'),
+(9, '9990001111'),
+(10, '9667778888');
+
+
+CREATE TABLE Reviews(
+	Review_id INT PRIMARY KEY,
+    ReviewDate DATE NOT NULL,
+    Content VARCHAR(50) ,
+    Rating INT NOT NULL CHECK(Rating<=5 AND Rating>=1)
+);
+
+INSERT INTO Reviews VALUES 
+(1, '2024-01-01', 'Great product, highly recommended!', 5),
+(2, '2024-01-02', 'Average product, needs improvement.', 3),
+(3, '2024-01-03', 'Very disappointed with the quality.', 1),
+(4, '2024-01-04', 'Decent product, worth the price.', 4),
+(5, '2024-01-05', 'Excellent service, will buy again.', 5),
+(6, '2024-01-06', 'Poor customer support, never again.', 2),
+(7, '2024-01-07', 'Not bad, but could be better.', 3),
+(8, '2024-01-08', 'Highly satisfied with the purchase.', 5),
+(9, '2024-01-09', 'Terrible experience, waste of money.', 1),
+(10, '2024-01-10', 'Good value for money, happy with it.', 4);
+SELECT * FROM Reviews;
+
+CREATE TABLE CustomerCare(
+	Customer_care_ID INT PRIMARY KEY,
+    Email VARCHAR(30) NOT NULL UNIQUE,
+    Phone_number VARCHAR(10) UNIQUE NOT NULL CHECK (LENGTH(Phone_number) = 10)
+);
+INSERT INTO CustomerCare(Customer_care_ID, Email, Phone_number) VALUES(1, 'Ezbuy@gmail.com', 9899006622);
+SELECT * FROM CustomerCare;
+
+CREATE TABLE Delivery_Agent (
+  DeliveryAgent_ID INT PRIMARY KEY NOT NULL,
+  FirstName VARCHAR(100) NOT NULL,
+  LastName VARCHAR(100),
+  PhoneNo BIGINT UNIQUE NOT NULL CHECK (LENGTH(PhoneNo)=10),
+  AdhaarNo BIGINT NOT NULL UNIQUE,
+  Availability VARCHAR(5) NOT NULL
+);
+INSERT INTO Delivery_Agent (DeliveryAgent_ID, FirstName, LastName, PhoneNo, AdhaarNo, Availability) VALUES
+  (1, 'Rajesh', 'Kumar', 9876543210, 1234567890, 'YES'),
+  (2, 'Priya', 'Sharma', 8765432109, 0987654321, 'NO'),
+  (3, 'Amit', 'Singh', 7654321098, 5678901234, 'YES'),
+  (4, 'Pooja', 'Patel', 6543210987, 4321098765, 'YES'),
+  (5, 'Suresh', 'Verma', 5432109876, 3456789012, 'NO'),
+  (6, 'Anjali', 'Yadav', 4321098765, 2109876543, 'YES'),
+  (7, 'Vikram', 'Malhotra', 3210987654, 7890123456, 'YES'),
+  (8, 'Neeta', 'Shah', 2109876543, 9012345678, 'NO'),
+  (9, 'Rahul', 'Gupta', 1098765432, 6789012345, 'YES'),
+  (10, 'Aarti', 'Sinha', 9876513210, 4567890123, 'YES');
+SELECT * FROM Delivery_Agent;
+
+
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY auto_increment,
+    DeliveryAgent_ID INT,
+    Customer_id INT,
+    discount DECIMAL(4,2) CHECK (discount <= 100.00),
+    total_price INT,
+    FOREIGN KEY (DeliveryAgent_ID) REFERENCES Delivery_Agent(DeliveryAgent_ID) ON DELETE SET NULL,
+    FOREIGN KEY (Customer_id) REFERENCES customer(Customer_id) ON DELETE SET NULL
+);
+
+INSERT INTO orders (order_id,Customer_id,DeliveryAgent_ID, discount,total_price) VALUES
+(1,1, 1, 00.00,100),
+(2,2, 2, 00.00,75),
+(3,2, 3, 00.00,199),
+(4,3, 4, 00.00,222),
+(5,4, 5, 00.50,965),
+(6,6, 6, 00.00,345),
+(7,5, 7, 00.00,444),
+(8,3, 8, 00.00,500),
+(9,2, 9, 00.00,543),
+(10,8 ,10, 00.00,223),
+(11,10, 2, 00.00,527),
+(12,1, 4, 00.00,276);
+
+CREATE TABLE product(
+	product_id INT PRIMARY KEY auto_increment,
+    name VARCHAR(30) ,
+    category VARCHAR(30) ,
+    description TEXT,
+    quantity INT ,
+    returnable boolean DEFAULT FALSE,
+    price DECIMAL(10,2) 
+);
+
+INSERT INTO product (product_id, name, category, description, quantity, returnable, price) VALUES
+(1, 'Rice', 'Grocery', 'Basmati rice, 5kg pack', 19, TRUE, 499.00),
+(2, 'Pulses', 'Grocery', 'Assorted pulses, 1kg pack', 29, TRUE, 99.00),
+(3, 'Sugar', 'Grocery', 'Refined sugar, 1kg pack', 3, TRUE, 49.00),
+(4, 'Tea Leaves', 'Grocery', 'Premium tea leaves, 250g pack', 98, TRUE, 199.00),
+(5, 'Wheat Flour', 'Grocery', 'Whole wheat flour, 5kg pack', 93, TRUE, 199.00),
+(6, 'Cooking Oil', 'Grocery', 'Refined cooking oil, 1L pack', 10, TRUE, 129.00),
+(7, 'Salt', 'Grocery', 'Iodized salt, 1kg pack', 11, TRUE, 19.00),
+(8, 'Spices', 'Grocery', 'Assorted spices, 100g pack', 9, TRUE, 49.00),
+(9, 'Milk', 'Grocery', 'Fresh cow milk, 1L pack', 100, FALSE, 39.00),
+(10, 'Bread', 'Grocery', 'Whole wheat bread, 400g pack', 26, TRUE, 29.00);
+
+SELECT * FROM product;
+
+
+CREATE TABLE order_details (
+    order_detail_id INT PRIMARY KEY auto_increment,
+    order_id INT,
+    product_id INT,
+    quantity INT NOT NULL,
+    price INT ,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE SET NULL
+);
+
+INSERT INTO order_details (order_detail_id, order_id, product_id, quantity) VALUES
+(1, 1, 1, 5),
+(2, 2, 2, 3),
+(3, 2, 3, 3),
+(4, 3, 3, 7),
+(5, 4, 4, 2),
+(6, 5, 5, 4),
+(7, 5, 1, 2),
+(8, 6, 6, 6),
+(9, 7, 7, 8),
+(10, 7, 3, 2),
+(11, 8, 8, 1),
+(12, 9, 9, 3),
+(13, 9, 4, 4),
+(14, 10, 10, 5);
+
+
+
+UPDATE order_details AS od JOIN product AS p ON od.product_id = p.product_id SET od.price = p.price * od.quantity;
+UPDATE orders AS o JOIN (SELECT order_id, SUM(price) AS total_price FROM order_details GROUP BY order_id) AS od ON o.order_id = od.order_id SET o.total_price = od.total_price;
+
+SELECT * FROM orders;
+SELECT * FROM order_details;
+
+CREATE TABLE payment(
+	transaction_id INT PRIMARY KEY,
+    amount DECIMAL(10,2) NOT NULL,
+    mode_of_transaction VARCHAR(20) NOT NULL
+);
+INSERT INTO payment(transaction_id, amount,mode_of_transaction) VALUES
+(1, 100,'NetBanking'),
+(2, 1000,'NetBanking'),
+(3, 1350,'COD'),
+(4, 5000.50,'UPI'),
+(5, 300.25,'COD'),
+(6, 100,'UPI'),
+(7, 427,'NetBanking'),
+(8, 15000,'COD'),
+(9, 18,'UPI'),
+(10, 18,'COD');
+
+SELECT * FROM payment;
+
+CREATE TABLE database_manager(
+	manager_id INT PRIMARY KEY,
+    username VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(20) NOT NULL UNIQUE
+);
+
+INSERT INTO database_manager VALUES(1,'admin','admin123');
+
+
+CREATE TABLE Vendor (
+  Vendor_ID INT PRIMARY KEY NOT NULL,
+  Name VARCHAR(100) NOT NULL,
+  PhoneNo BIGINT UNIQUE NOT NULL CHECK (LENGTH(PhoneNo)=10),
+  Penalties INT default 0
+);
+
+INSERT INTO Vendor (Vendor_ID, Name, PhoneNo, Penalties) VALUES
+  (1, 'Mumbai Spices', 9876543210, 100),
+  (2, 'Delhi Emporium', 8765432109, 0),
+  (3, 'Chennai Traders', 7654321098, 0),
+  (4, 'Punjab Farms', 6543210987, 0),
+  (5, 'Bengal Groceries', 5432109876, 0),
+  (6, 'Rajasthan Organics', 4321098765, 0),
+  (7, 'Kolkata Sweets', 3210987654, 0),
+  (8, 'Gujarat Spices', 2109876543, 0),
+  (9, 'Lucknow Fruits', 1098765432, 0),
+  (10, 'Hyderabad Health Foods', 9876513210, 0);
+
+
+
+CREATE TABLE inventory(
+	inventory_id INT PRIMARY KEY,
+    vendor_id INT,
+    location VARCHAR(100) NOT NULL,
+    FOREIGN KEY(vendor_id) REFERENCES Vendor(vendor_ID) ON DELETE SET NULL
+);
+
+INSERT INTO inventory (inventory_id,vendor_id,location) VALUES
+(1,1, 'Rohini'),
+(2,2, 'Okhla'),
+(3,3, 'Govindpuri'),
+(4,4, 'Kalkaji'),
+(5,5, 'Dwarka'),
+(6,6, 'Gurgaon'),
+(7,7, 'Khan Market'),
+(8,8, 'Nehru Place'),
+(9,9, 'JLN'),
+(10,10, 'Rajiv Chowk');
+
+SELECT * FROM inventory;
+
+CREATE TABLE Delivery_Agency (
+  Agency_ID INT PRIMARY KEY ,
+  Name VARCHAR(100) NOT NULL,
+  Location VARCHAR(100) NOT NULL
+);
+
+INSERT INTO Delivery_Agency (Agency_ID, Name, Location) VALUES
+  (1, 'SpeedyParcel India', 'Mumbai Branch'),
+  (2, 'IndianExpress Logistics', 'Delhi Branch'),
+  (3, 'SwiftCourier India', 'Kolkata Branch'),
+  (4, 'MetroMovers', 'Chennai Branch'),
+  (5, 'PatriotDeliveries', 'Bengaluru Branch'),
+  (6, 'GangesDispatch', 'Hyderabad Branch'),
+  (7, 'RajdhaniCouriers', 'Jaipur Branch'),
+  (8, 'QuickCargo Services', 'Ahmedabad Branch'),
+  (9, 'TajLogistics', 'Lucknow Branch'),
+  (10, 'GujaratExpress', 'Pune Branch');
+
+SELECT * FROM Delivery_Agency;
+SELECT * FROM customer;
+SELECT * FROM product;
+SHOW TABLES;
+
+CREATE TABLE login_attempts(
+    Pass VARCHAR(200),
+	Email VARCHAR(200)
+);
+
+
+
+ALTER TABLE customer
+ADD Blocked INT default 0;
+
+-->Triggers
+
+DELIMITER $$
+CREATE TRIGGER block_account_after_three_attempts
+AFTER INSERT ON login_attempts
+FOR EACH ROW
+BEGIN
+    DECLARE failed_attempts INT;
+    DECLARE pass VARCHAR(255);
+    DECLARE email VARCHAR(255);
+    SET email = NEW.Email;
+    SET pass = NEW.Pass;
+    
+    SELECT COUNT(*) INTO failed_attempts
+    FROM login_attempts
+    WHERE login_attempts.Email = email;
+
+    IF failed_attempts >= 3 AND NOT EXISTS (
+        SELECT *
+        FROM customer
+        WHERE customer.Password = pass and customer.Email = email
+    ) THEN
+        UPDATE customer
+        SET customer.Blocked = 1
+        WHERE customer.Email = email;
+    END IF;
+END;
+$$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS DeliveryAgentAvail;
+DELIMITER $$
+CREATE TRIGGER DeliveryAgentAvail AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+    UPDATE Delivery_Agent SET Availability = 'NO' WHERE DeliveryAgent_ID = NEW.DeliveryAgent_ID;
+END;
+$$
+DELIMITER ;
+
+
+
+
