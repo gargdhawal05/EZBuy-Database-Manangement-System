@@ -1,0 +1,91 @@
+
+-- Find names of customers who have a Premium subscription.
+SELECT First_name, Second_name 
+FROM customer 
+WHERE Subscription = 'Premium';
+
+-- Calculate the Average Rating of all the orders.
+SELECT AVG(Rating) AS AverageRating 
+FROM Reviews;
+
+-- Find the names and prices of products with a price greater than the average price.
+SELECT name, price 
+FROM product 
+WHERE price > (SELECT AVG(price) FROM product);
+
+-- Find all the delivery agents who are available
+SELECT DeliveryAgent_ID, FirstName, LastName
+FROM Delivery_Agent
+WHERE Availability = 'YES';
+
+-- Find all customers whose name starts with 'A'
+SELECT * 
+FROM customer 
+WHERE First_name LIKE 'A%';
+
+-- Update Address of customer with id=1
+UPDATE customer
+SET Address = '540 Mg Road, Gurgaon, Haryana'
+WHERE Customer_id = 1;
+
+-- Find the total deliveries made by each Delivery Agent
+SELECT orders.DeliveryAgent_ID, Delivery_Agent.FirstName, Delivery_Agent.LastName, COUNT(*) AS Total_Deliveries
+FROM orders
+JOIN Delivery_Agent ON orders.DeliveryAgent_ID = Delivery_Agent.DeliveryAgent_ID
+GROUP BY orders.DeliveryAgent_ID, Delivery_Agent.FirstName, Delivery_Agent.LastName;
+
+-- Find the customer with the most money spent.
+SELECT c.Customer_id, c.First_name, c.Second_name, c.Email, SUM((od.quantity * p.price) - ((od.quantity * p.price) * (o.discount / 100))) AS total_spent
+FROM customer c
+JOIN orders o ON c.Customer_id = o.Customer_id
+JOIN order_details od ON o.order_id = od.order_id
+JOIN product p ON od.product_id = p.product_id
+GROUP BY c.Customer_id
+ORDER BY total_spent DESC
+LIMIT 1;
+
+-- List all the products with ratings>=3
+SELECT distinct(p.name), p.category, p.description, p.price, r.Rating
+FROM product p
+JOIN order_details od ON p.product_id = od.product_id
+JOIN orders o ON od.order_id = o.order_id
+JOIN Reviews r ON r.Review_id = p.product_id
+WHERE r.Rating >= 3;
+
+-- Find customers who have not placed any order
+
+SELECT c.First_name, c.Second_name
+FROM customer c
+LEFT JOIN orders o ON c.Customer_id = o.Customer_id
+WHERE o.Customer_id IS NULL;
+
+
+-- Queries that voilates the constraints
+
+INSERT INTO customer VALUES (11, 'John', 'Doe', 'amit@gmail.com', 'password11', 'Basic', '123 Oak St, Mumbai, India');
+-- This violates the unique constraint on the email column because 'amit@gmail.com' already exists in the database.
+
+
+INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (11, '12345678901');
+-- This violates the check constraint on the phone_number column, which ensures that the phone number has exactly 10 digits.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
