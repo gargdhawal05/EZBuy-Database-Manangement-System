@@ -1,0 +1,115 @@
+Embedded SQL
+
+#Write an application to order items
+
+-- get list of all products to display to customers
+    	query = ("select product.product_id, product.name, product.category, product.price, product.description, product.returnable from product")         	cursor.execute(query)
+
+--get a particular product's all details by its product_id (used by the admin to check the requested quantity is available or not)
+    	query = "SELECT * FROM product WHERE product_id = %s"
+    	cursor.execute(query, (product_id,))
+
+--update product quantity in the inventory directly
+        update_query = "UPDATE product SET quantity = quantity - %s WHERE product_id = %s"
+        cursor.execute(update_query, (pqty, pid))
+
+-- assigning an available delivery agent to the order
+    	da_id_query = "SELECT DA.DeliveryAgent_ID FROM Delivery_Agent DA WHERE DA.Availability = 'YES' LIMIT 1"
+    	cursor.execute(da_id_query)
+    	da_id = cursor.fetchone()[0]
+
+-- updating the delivery agent's availability
+    	update_daid = f"UPDATE Delivery_Agent SET Availability = 'NO' WHERE DeliveryAgent_ID = {da_id}"
+    	cursor.execute(update_daid)
+   
+--inserting values in the orders table
+    	order_query = ("INSERT INTO orders(Customer_ID, DeliveryAgent_ID, discount,total_price) VALUES (%s,%s,%s,%s)")
+    	order_data = (order['customer_id'], da_id,00.00,00.00)
+
+    	cursor.execute(order_query, order_data)
+    	order_id = cursor.lastrowid
+
+-- inserting value in order details query
+   	order_details_query = ("INSERT INTO order_details "
+                           "(order_id, product_id, quantity, price)"
+                           "VALUES (%s, %s, %s, %s)")
+	cursor.executemany(order_details_query, order_details_data)
+
+--update order details price based on product price
+    	update_order_details_price_query = f"UPDATE order_details AS od JOIN product AS p ON od.product_id = p.product_id SET od.price = p.price * od.quantity WHERE od.order_id = %s;"
+    	cursor.execute(update_order_details_price_query, (order_id,))
+
+ --calculate total price for the order
+    	calculate_total_price_query =f"UPDATE orders AS o JOIN (SELECT order_id, SUM(price) AS total_price FROM order_details GROUP BY order_id) AS od ON o.order_id = od.order_id SET o.total_price = od.total_price WHERE o.order_id = %s;"
+    	cursor.execute(calculate_total_price_query, (order_id,))
+
+
+ --calculating the total bill amount
+    	bill_query = f"UPDATE orders JOIN (SELECT order_id, SUM(price) AS final_price FROM order_details GROUP BY order_id) AS od ON orders.order_id = od.order_id SET orders.total_price = od.final_price;"
+    	cursor.execute(bill_query)
+
+
+
+#Used by admin
+
+--insert a new product
+	 query=("INSERT INTO product""(name, category, description, quantity, returnable, price)""VALUES (%s,%s,%s,%s,%s,%s)")
+    	 data=(product['name'],product['category'],product['description'],product['quantity'],product['returnable'],product['price'])
+    	 cursor.execute(query,data)
+
+--delete a product
+	delete_query = "DELETE FROM product WHERE product_id = %s IF EXISTS (SELECT 1 FROM product WHERE product_id = %s)"
+    	cursor.execute(delete_query, (product_id, product_id))
+
+(inventory analysis)
+--most revenue generating product
+	query = "SELECT p.name AS Product_Name, SUM(od.price) AS Revenue FROM order_details od INNER JOIN product p ON od.product_id = p.product_id GROUP BY p.name ORDER BY Revenue DESC LIMIT 1;"
+
+--top 5 most purchased products
+        query = "SELECT p.name AS Product_Name, SUM(od.quantity) AS total_quantity FROM order_details od INNER JOIN product p ON od.product_id = p.product_id GROUP BY p.name ORDER BY total_quantity DESC LIMIT 5;"
+
+--products with low stock
+        query ="SELECT name AS Product_Name, quantity AS stock FROM product WHERE quantity < 5;"
+
+--view all orders
+	 query = ("SELECT * FROM orders")
+    	 cursor.execute(query)
+	-- gets all order details
+	 query = """SELECT order_details.order_id, order_details.quantity, order_details.price,
+               		product.name AS product_name, product.price AS price_per_unit
+        		FROM order_details 
+        		LEFT JOIN product ON order_details.product_id = product.product_id 
+        		WHERE order_details.order_id = %s
+    		"""
+
+    	cursor.execute(query, (order_id,))
+
+
+#Login/Register
+
+-- to check if the entered password and email is a valid customer's
+	cursor.execute("SELECT Customer_id FROM customer WHERE Email=%s AND Password=%s", (email, password))
+    	customer_id = cursor.fetchone()
+
+-- greeting query
+	greeting_query ="SELECT CONCAT('Welcome, ', First_name, ' ',COALESCE(Second_name, '')) AS greeting FROM customer WHERE Customer_id = %s"
+        cursor.execute(greeting_query, (cid,))
+
+--registration
+	 cursor.execute('SELECT * FROM customer WHERE Email = %s', (email,))
+    	 account = cursor.fetchone()
+
+	cursor.execute('INSERT INTO customer (First_name, Second_name, Email, Password, Address) VALUES (%s, %s, %s, %s, %s)',
+                        (firstname, lastname, email, password, address))
+        last_inserted_customer_id = cursor.lastrowid
+        
+        cursor.execute('INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (%s, %s)',
+                        (last_inserted_customer_id, phone))
+        if altphone:
+            cursor.execute('INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (%s, %s)',
+                            (last_inserted_customer_id, altphone))
+
+--admin login
+	 cursor.execute("SELECT manager_id FROM database_manager WHERE username = %s AND password = %s", (username, password))
+    	 admin = cursor.fetchone()
+
