@@ -1,5 +1,5 @@
 # DBMS-project
-Project on Online Retail Platform(Database Management)
+Project on Online Retail Platform(EZBuyDataBase)
 
 ## Group Members
 
