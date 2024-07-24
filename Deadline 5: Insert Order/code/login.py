@@ -1,75 +1,108 @@
-from connection import get_connect
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_mysqldb import MySQL
 import re
+c_id=10
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Myfamily5*'
+app.config['MYSQL_DB'] = 'EZBuyDatabase'
+
+mysql = MySQL(app)
+
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    msg = ''
+    if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
+        email = request.form['email']
+        password = request.form['password']
+
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT * FROM customer WHERE Email= %s AND Password = %s', (email,password))
+        customer = cursor.fetchone() 
+
+        cursor.execute('SELECT Blocked FROM customer WHERE Email = %s', (email,))
+        blocked_status = cursor.fetchone()
+
+        if blocked_status[0]==1:
+            msg='Your account is blocked!'
+
+        elif customer and password:  
+            session['loggedin'] = True
+            session['id'] = customer[0]  
+            session['email'] = customer[2]  
+            msg = 'Logged in successfully!'
+            return redirect(url_for('index'))  
+        else:
+            cursor.execute('INSERT INTO login_attempts (Pass,Email) VALUES (%s, %s)', (password, email))
+            mysql.connection.commit()
+
+            cursor.execute('SELECT Blocked FROM customer WHERE Email = %s', (email,))
+            blocked_status = cursor.fetchone()
+            
+            if blocked_status and blocked_status[0] == 1:
+                msg = 'Your account has been blocked due to multiple failed login attempts. Please contact support for assistance.'
+            else:
+                msg = 'Incorrect email / password!'
+    return render_template('login.html', msg=msg)
 
 
-def check_login(connection, email, password):
-    cursor = connection.cursor()
-    cursor.execute("SELECT Customer_id FROM customer WHERE Email=%s AND Password=%s", (email, password))
-    customer_id = cursor.fetchone()
-    # print(customer_id[0])
-    if customer_id:
-        print("Login Successful")
-        cursor.close()
-        return customer_id[0]
-    else:
-        print("Wrong email or password. Login Attempt Failed.")
-        cursor.close()
-        return None
+@app.route('/logout')
+def logout():
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('email', None)       
+    return redirect(url_for('login'))
 
 
-def register(connection):
-    email = input("Enter your email: ")
-    password = input("Enter your password(8 characters): ")
-    firstname = input("Enter your first name: ")
-    lastname = input("Enter your last name: ")
-    phone = input("Enter your phone number: ")
-    altphone = input("Enter your alternative phone number (optional): ")
-    address = input("Enter your address: ")
-
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM customer WHERE Email = %s', (email,))
-    account = cursor.fetchone()
-    if account:
-        print('Account already exists!')
-        return False
-
-    if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-        print('Invalid email address!')
-        return False
-    elif len(password) < 8:
-        print('Password must be at least 8 characters long!')
-        return False
-    else:
-        cursor.execute('INSERT INTO customer (First_name, Second_name, Email, Password, Address) VALUES (%s, %s, %s, %s, %s)',
-                        (firstname, lastname, email, password, address))
-        last_inserted_customer_id = cursor.lastrowid
-        
-        cursor.execute('INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (%s, %s)',
-                        (last_inserted_customer_id, phone))
-        if altphone:
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    msg = ''
+    if request.method == 'POST' and 'password' in request.form and 'email' in request.form:
+        password = request.form['password']
+        email = request.form['email']
+        firstname = request.form['firstname']
+        lastname = request.form.get('lastname')
+        phone = request.form['phone']
+        altphone = request.form.get('altphone')
+        address = request.form['address']
+        cursor = mysql.connection.cursor()
+        Customer_id = c_id+1
+        cursor.execute('SELECT * FROM customer WHERE Email = %s', (email,))
+        account = cursor.fetchone()
+        if account:
+            msg = 'Account already exists!'
+        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+            msg = 'Invalid email address!'
+        elif len(password) < 8:
+            msg = 'Password must be at least 8 characters long!'
+        else:
+            cursor.execute('INSERT INTO customer (Customer_id,First_name, Second_name, Email, Password, Address) VALUES (%s,%s, %s, %s, %s, %s)',
+                           (Customer_id,firstname, lastname, email, password, address))
+            
             cursor.execute('INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (%s, %s)',
-                            (last_inserted_customer_id, altphone))
-        connection.commit()
-        print('You have successfully registered!')
-        return last_inserted_customer_id
+                           (Customer_id, phone))
+            if altphone:
+                cursor.execute('INSERT INTO customer_phone_numbers (customer_id, Phone_number) VALUES (%s, %s)',
+                               (Customer_id, altphone))
+            mysql.connection.commit()
+            msg = 'You have successfully registered!'
+    elif request.method == 'POST':
+        msg = 'Please fill out the form!'
+    return render_template('register.html', msg=msg)
 
-def index(customer):
-    print("Welcome, ", customer['Email'])  
-    return
-
-def admin_login(connection):
-    username = input("Enter your username: ")
-    password = input("Enter your password: ")
-
-    cursor = connection.cursor()
-    cursor.execute("SELECT manager_id FROM database_manager WHERE username = %s AND password = %s", (username, password))
-    admin = cursor.fetchone()
-
-    if admin:
-        print("Admin login successful!")
-        return admin[0]
-    else:
-        print("Invalid username or password. Admin login failed.")
-        return None
+@app.route('/index')
+def index():
+    if 'loggedin' in session:
+        if 'email' in session: 
+            return render_template('index.html', email=session['email'])
+        else:
+            return render_template('index.html', username=session['username']) 
+    return redirect(url_for('login'))  
 
 
+if __name__ == "__main__":
+    app.run(debug=True)
